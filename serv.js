@@ -54,11 +54,11 @@ scan.toArray(function(err, res2) {
     /*for(var cols of row.columns){
       console.log(cols);
     }*/
-		var point = {};
+
     //console.log(row.columns);
     //console.log(row.cols);
-    var rowX = row.cols['zoom0:x'].value;
-    var rowY = row.cols['zoom0:y'].value;
+    var rowX = BitConverter.toShort(row.cols['zoom0:x'].value);
+    var rowY = BitConverter.toShort(row.cols['zoom0:y'].value);
 		var tabVal = row.cols['zoom0:value'].value;
     var tabValC = [];
     //console.log(tabVal);
@@ -66,12 +66,11 @@ scan.toArray(function(err, res2) {
       //console.log(BitConverter.toShort(b));
       tabValC.push(BitConverter.toShort(b));
     }
-    point.x=rowX;
-    console.log(point.x);
-    point.y=rowY;
-    console.log(point.y);
-    point.val=tabValC;
-    console.log(point.val);
+    var point = {
+      "x": rowX,
+      "y": rowY,
+      "value": tabValC
+    };
     data.point.push(point);
     //var rowLng = row.cols['loc:lng'].value.toString('utf8');
 		//var rowH = row.cols['zoom1:hauteur'].value.toString('utf8')
