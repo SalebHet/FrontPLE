@@ -11,23 +11,36 @@ var gradient = [
 
     function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 13,
-          center: {lat: 37.775, lng: -122.434},
+          zoom: 6,
+          center: {lat: 48.805593, lng: 2.350119},//48.805593, 2.350119
           mapTypeId: 'satellite'
         });
 
-        map.addListener('zoom_changed', function() {
+        map.addListener('zoom_changed', function d() {
           datajson.zoom = map.getZoom();
           datajson.bounds = map.getBounds();
-          var point = jsonData();
-          var tab = [];
-          console.log("point : " + point);
-/*for(p of point){
-			  var x = {location : new google.maps.LatLng(p.lat, p.lng), weight: p.height};
-			tab.push(x);
+          $.ajax({
+            url: 'http://beetlejuice:8887/clenerestan/json',
+            contenttype: 'application/json',
+            success: function (data) {
+              points = [];
+              console.log("pogchamp");
+              console.log(data);
+              var dede = JSON.parse(data);
+              console.log(dede);
+              for(var i = 0; i < dede.length; i++){
+                console.log("insecul");
+                console.log(dede[i].lat);
+                points.push({location: new google.maps.LatLng(dede[i].lat, dede[i].lng), weight: dede[i].height},);
+                //console.log("points:");
+                //console.log(points);
+              }
+              console.log("new heatmap");
+              heatmap.setData(points);
 
-    }*/
+            }
         });
+      });
 
         google.maps.event.addListener(map, 'idle', function(){
         datajson.zoom = map.getZoom();
@@ -561,16 +574,17 @@ var gradient = [
       //datajson.zoom = map.getZoom();
       //datajson.bounds = map.getBounds();
       function jsonData(){
+        console.log("Requete AJAX");
         $.ajax({
           contentType : 'application /json',
-          url: 'http://beetlejuice:8888/clenerestan/json',
+          url: 'http://beetlejuice:8887/clenerestan/json',
           success : function(data) {
             console.log("JSONP OKLM");
             console.log("data : " + data);
             var set = JSON.parse(data);
             console.log("set" + set);
             for (var i in set.point){
-              console.log("lat : " + set.point[i].lat);
+              console.log("lat : " + set.point[i].x);
             }
             return set;
           }

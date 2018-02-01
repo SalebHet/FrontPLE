@@ -1,4 +1,4 @@
-const port = 8888;
+const port = 8887;
 
 const BitConverter = require('bit-converter');
 var express = require('express');
@@ -26,13 +26,15 @@ var data = {
   point:[]
 };
 
+function bytearrayToInt(bytearray) {
+	return Uint16Array.from(bytearray)[0];
+}
 
 
-/*
 const filter= {
 	singleColumnValueFilter: {
 		columnFamily: 'zoom6',
-		columnQualifier: 'value',
+		columnQualifier: 'x',
 		compareOp: 'NOT_EQUAL',
 		comparator:{
 			substringComparator: {
@@ -41,22 +43,25 @@ const filter= {
 	   },
   }
 };
-*/
-//scan.setFilter({columnPrefixFilter: {prefix: 'zoom6'}});
 
+scan.setFilter(filter);
 
-//function getData(){
+/*
+function getData(){
 scan.toArray(function(err, res2) {
   console.log("start toArray");
 	//console.log(res2);
+  var i = 0;
 	for(var row of res2){
     //console.log(row.columnFamily.toString('utf8'));
     /*for(var cols of row.columns){
       console.log(cols);
-    }*/
+    }
 
     //console.log(row.columns);
     //console.log(row.cols);
+    console.log(i);
+    i++;
     var rowX = BitConverter.toShort(row.cols['zoom0:x'].value);
     var rowY = BitConverter.toShort(row.cols['zoom0:y'].value);
 		var tabVal = row.cols['zoom0:value'].value;
@@ -82,7 +87,7 @@ scan.toArray(function(err, res2) {
     point.lat = rowLat;
 		point.lng = rowLng;
 		point.height = 75;
-    */
+
   }
 		//console.log("Lat : " + rowLat);
 		//console.log("Lng : " + rowLng);
@@ -91,84 +96,79 @@ scan.toArray(function(err, res2) {
     console.log(data);
 console.log("Fin scanToArray");
 });
-//}
-
-
-/*
-var data = {};
-scan.next(function(err, row) {
-	console.log("Start next");
-	for(var val in arguments){
-	   //console.log(row);
-     var tabB  = row.cols['zoom0:value'].value;
-     for (var b in tabB ){
-       console.log(BitConverter.toShort(b));
-     }
-		  //console.log("row.columns = " + row.columns);
-    /*
-    var rowLat = parseFloat(row.cols['zoom1:lat'].value.toString('utf8'));
-		var rowLng = parseFloat(row.cols['zoom1:lng'].value.toString('utf8'));
-		var rowH = parseInt(row.cols['zoom1:hauteur'].value.toString('utf8'));
-		console.log("lat: " + rowLat);
-    data.lat = rowLat;
-    data.lng = rowLng;
-    data.height = rowH;
-    console.log("lng :" + rowLng);
-    console.log("H: " + rowH);
-
-		console.log(val.toString());
-	}
-		console.log("Arguments" + arguments);
-		console.log("Fin Next");
-});
-
-/*
-//Mise en place heatmap
-// don't forget to add gmaps-heatmap.js
-var myLatlng = new google.maps.LatLng(25.6586, -80.3568);
-// map options,
-var myOptions = {
-  zoom: 3,
-  center: myLatlng
-};
-// standard map
-map = new google.maps.Map(document.getElementById("map"), myOptions);
-// heatmap layer
-heatmap = new HeatmapOverlay(map,
-  {
-    // radius should be small ONLY if scaleRadius is true (or small radius is intended)
-    "radius": 2,
-    "maxOpacity": 1,
-    // scales the radius based on map zoom
-    "scaleRadius": true,
-    // if set to false the heatmap uses the global maximum for colorization
-    // if activated: uses the data maximum within the current map boundaries
-    //   (there will always be a red spot with useLocalExtremas true)
-    "useLocalExtrema": true,
-    // which field name in your data represents the latitude - default "lat"
-    latField: 'lat',
-    // which field name in your data represents the longitude - default "lng"
-    lngField: 'lng',
-    // which field name in your data represents the data value - default "value"
-    valueField: 'count'
-  }
-);
-
-var testData = {
-  max: 8,
-  data: [{lat: 24.6408, lng:46.7728, count: 3},
-    {lat: 50.75, lng:-1.55, count: 1},
-    {lat: 45.75, lng: 1.55, count: 5},
-    {lat: 44.808488, lng:-0.596694, count: 25},
-    {lat: 75.120, lng:32.0123, count: 7},]
-};
-
-heatmap.setData(testData);
-
-
-
+}
 */
+var data = {
+  point:[]
+};
 
+//var data = {};
+
+  scan.next(function(err, row) {
+    /*for (var i ; i< row.columns.length;i++){
+      console.log(row.columns[i].family);
+    console.log(row.columns[i].family.toString('utf8'));
+  }
+  	/*for(var val in arguments){*/
+    console.log(row.cols);
+      var rowX = bytearrayToInt(row.cols['zoom0:x'].value);
+      var rowY = bytearrayToInt(row.cols['zoom0:y'].value);
+      var tabVal = row.cols['zoom0:value'].value;
+      var tabValC = [];
+      //console.log(tabVal);
+      for(var b in tabVal){
+        //console.log(BitConverter.toShort(b));
+        tabValC.push(BitConverter.toShort(b));
+      }
+      var point = {
+        "x": rowX,
+        "y": rowY,
+        "value": tabValC
+      };
+      console.log(rowX);
+      console.log(rowY);
+      data.point.push(point);
+      /*
+      var rowLat = parseFloat(row.cols['zoom1:lat'].value.toString('utf8'));
+  		var rowLng = parseFloat(row.cols['zoom1:lng'].value.toString('utf8'));
+  		var rowH = parseInt(row.cols['zoom1:hauteur'].value.toString('utf8'));
+  		console.log("lat: " + rowLat);
+      data.lat = rowLat;
+      data.lng = rowLng;
+      data.height = rowH;
+      console.log("lng :" + rowLng);
+      console.log("H: " + rowH);
+
+  		console.log(val.toString());
+      */
+  	//}
+  });
+
+function cleanPoint(d){
+    //console.log(d.point);
+    var data = [];
+    var lat = (((d.point[0].x)*256)*(1/1201));
+    var lng = (((d.point[0].y)*256)*(1/1201));
+    //console.log(d.point[0].value);
+    var c = 0;
+    for(var i = 0 ; i < d.point[0].value.length;i++){
+      c++;
+    var h = d.point[0].value[i];
+    lat+=0.00001;
+    if(c > 256){
+      lng+=0.00001;
+      c = 0
+    }
+    var point = {
+      "lat": lat,
+      "lng": lng,
+      "height": h
+    };
+    data.push(point);
+  }
+    //console.log(point);
+    return data;
+  }
 
 
 
@@ -182,10 +182,8 @@ app.get('/clenerestan',function(req,res){
     res.sendFile(path.join(__dirname+'/public/index.html'));
 });
 
-app.get('/clenerestan/json',function(req,res){
-  //getData();
-  console.log("jsonP = " + data);
-  res.jsonp(JSON.stringify(data));
+app.get('/clenerestan/json', function(req,res){
+ res.jsonp(JSON.stringify(cleanPoint(data)));
 });
 
 
